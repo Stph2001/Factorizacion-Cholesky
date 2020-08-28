@@ -2,11 +2,12 @@
 #include <conio.h>
 #include <time.h>
 #include <math.h>
+#include <iomanip>
 using namespace std;
 
 class Matriz {
 private:
-	double** matriz;
+	float** matriz;
 	int N = 0;
 	bool sim = true;
 public:
@@ -22,7 +23,7 @@ public:
 	void Imprimir_matriz() {
 		Imprimir();
 	}
-	double** Obtener_matriz() {
+	float** Obtener_matriz() {
 		return matriz;
 	}
 	bool Obtener_simetria() {
@@ -30,19 +31,19 @@ public:
 		return sim;
 	}
 	int Obtener_determinante() {
-		return Determinante(matriz,N);
+		return Determinante();
 	}
 
 private:
 	void Crear_matriz() {
-		matriz = new double* [N];
+		matriz = new float* [N];
 		for (int i = 0; i < N; i++)
-			matriz[i] = new double[N];
+			matriz[i] = new float[N];
 	}
 	void Generar_numeros() {
 		for (int i = 0; i < N; i++) {
 			for (int j = 0; j < N; j++)
-				matriz[i][j] = 1;// double(rand() % (101 - 1) + 1) / 10;
+				matriz[i][j] = double(rand() % (6 - 1) + 1); //double(rand() % (101 - 1) + 1) / 10;
 		}
 	}
 	void Imprimir() {
@@ -60,36 +61,57 @@ private:
 			}
 		}
 	}
-	int Determinante(double**matriz1,int orden) {
-		int det = 0;
-
-		for (int i = 0; i < orden; i++) {
-			det += matriz1[0][i] * cofactor(matriz1,orden,0,i);
-		}
-		return det;
-	}
-	int cofactor(double**matriz1,int orden,int fila,int columna) {
-		double** submatriz = new double* [N];
+	int Determinante() {
+		int det = 1;
+		float** submatriz=new float*[N];
 		for (int i = 0; i < N; i++) {
-			submatriz[i] = new double[N];
+			submatriz[i] = new float[N];
 		}
-		int n = orden - 1;
+		Escalonar(submatriz);
 
-		int x = 0;
-		int y = 0;
-		for (int i = 0; i < orden; i++) {
-			for (int j = 0; j < orden; j++) {
-				if (i != fila && j != columna) {
-					submatriz[x][y] = matriz1[i][j];
-					y++;
-					if (y>=n) {
-						x++;
-						y = 0;
-					}
-				}
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (i == j)
+					det *= submatriz[i][j];
 			}
 		}
-		return pow(-1, fila + columna) * Determinante(submatriz,n);
+
+		cout << "El determinante es: " << det << endl;
+		return det;
+	}
+	void Escalonar(float**submatriz) {
+		float num;
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				submatriz[i][j] = matriz[i][j];
+			}
+		}
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (i != 0 && matriz[i][j] != 0 && j < i) {
+					num = submatriz[i][j] / submatriz[j][j];
+					for (int k = j; k < N; k++) {
+						if (num*submatriz[j][k]==submatriz[i][k]||k<=j)
+							submatriz[i][k] = 0;
+						else
+							submatriz[i][k] = -(num * submatriz[j][k]) + submatriz[i][k];
+					}
+					if (j + 1 == i)
+						break;
+				}
+				else
+					submatriz[i][j] = matriz[i][j];
+			}
+		}
+
+		cout << endl;
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				cout <<setprecision(2)<< submatriz[i][j] << "\t";
+			}
+			cout << endl;
+		}
 	}
 };
 
@@ -99,7 +121,7 @@ int main() {
 
 	do {
 		cout << "Ingrese n entre 4 y 10: "; cin >> n;
-	} while (n < 3 || n > 10);
+	} while (n < 4 || n > 10);
 
 	Matriz *m=new Matriz(n);
 
@@ -108,6 +130,9 @@ int main() {
 	if (m->Obtener_simetria() == true) {
 		cout << "La matriz es simetrica"<<endl;
 	}
+
+	
+
 	if (m->Obtener_determinante() > 0) {
 		cout << "La matriz es definida positiva";
 	}
