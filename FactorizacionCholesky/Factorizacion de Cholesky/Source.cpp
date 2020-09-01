@@ -62,25 +62,28 @@ private:
 		}
 	}
 	int Determinante() {
-		int det = 1;
-		float** submatriz=new float*[N];
-		for (int i = 0; i < N; i++) {
-			submatriz[i] = new float[N];
-		}
-		Escalonar(submatriz);
+		double* det = new double;
+		*det = 1;
+		
+		Escalonar();
 
 		for (int i = 0; i < N; i++) {
 			for (int j = 0; j < N; j++) {
 				if (i == j)
-					det *= submatriz[i][j];
+					*det = *det * matriz[i][j];
 			}
 		}
 
-		cout << "El determinante es: " << det << endl;
-		return det;
+		cout << "El determinante es: " <<  (int)*det << endl;
+		return *det;
 	}
-	void Escalonar(float**submatriz) {
-		float num;
+	void Escalonar() {
+		float num = 1000;
+		float** submatriz = new float* [N];
+		for (int i = 0; i < N; i++) {
+			submatriz[i] = new float[N];
+		}
+
 		for (int i = 0; i < N; i++) {
 			for (int j = 0; j < N; j++) {
 				submatriz[i][j] = matriz[i][j];
@@ -88,27 +91,31 @@ private:
 		}
 
 		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < N; j++) {
-				if (i != 0 && matriz[i][j] != 0 && j < i) {
-					num = submatriz[i][j] / submatriz[j][j];
-					for (int k = j; k < N; k++) {
-						if (num*submatriz[j][k]==submatriz[i][k]||k<=j)
-							submatriz[i][k] = 0;
+			for (int k = 0; k < i; k++) {
+				for (int j = k; j < N; j++) {
+					if (num == 1000) {
+						if (submatriz[j][j] != 0) {
+							num = submatriz[i][j] / submatriz[j][j];
+						}
 						else
-							submatriz[i][k] = -(num * submatriz[j][k]) + submatriz[i][k];
+							num = 1;
 					}
-					if (j + 1 == i)
-						break;
+					if (submatriz[k][j] * num != 0) {
+						submatriz[i][j] = -(submatriz[k][j] * num) + (submatriz[i][j]);
+					}
+					else
+						submatriz[i][j] = submatriz[i][j];
+					submatriz[i][k] = 0;
 				}
-				else
-					submatriz[i][j] = matriz[i][j];
+				num = 1000;
 			}
 		}
 
 		cout << endl;
 		for (int i = 0; i < N; i++) {
 			for (int j = 0; j < N; j++) {
-				cout <<setprecision(2)<< submatriz[i][j] << "\t";
+				matriz[i][j] = submatriz[i][j];
+				cout <<setprecision(2)<< matriz[i][j] << "\t";
 			}
 			cout << endl;
 		}
@@ -121,7 +128,7 @@ int main() {
 
 	do {
 		cout << "Ingrese n entre 4 y 10: "; cin >> n;
-	} while (n < 4 || n > 10);
+	} while (n < 3 || n > 10);
 
 	Matriz *m=new Matriz(n);
 
@@ -133,7 +140,7 @@ int main() {
 
 	
 
-	if (m->Obtener_determinante() > 0) {
+	if (m->Obtener_determinante() >= 0) {
 		cout << "La matriz es definida positiva";
 	}
 
