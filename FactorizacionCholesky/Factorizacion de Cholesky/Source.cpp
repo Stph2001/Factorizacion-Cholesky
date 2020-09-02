@@ -8,6 +8,7 @@ using namespace std;
 class Matriz {
 private:
 	float** matriz;
+	float** matriz2;
 	int N = 0;
 	bool sim = true;
 public:
@@ -33,17 +34,34 @@ public:
 	int Obtener_determinante() {
 		return Determinante();
 	}
+	void Generar_Cholesky() {
+		Cholesky();
+	}
 
 private:
 	void Crear_matriz() {
 		matriz = new float* [N];
-		for (int i = 0; i < N; i++)
+		matriz2 = new float* [N];
+		for (int i = 0; i < N; i++) {
 			matriz[i] = new float[N];
+			matriz2[i] = new float[N];
+		}
 	}
 	void Generar_numeros() {
+		matriz[0][0] = 5;
+		matriz[0][1] = 4;
+		matriz[0][2] = 3;
+		matriz[1][0] = 4;
+		matriz[1][1] = 6;
+		matriz[1][2] = 2;
+		matriz[2][0] = 3;
+		matriz[2][1] = 2;
+		matriz[2][2] = 3;
 		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < N; j++)
-				matriz[i][j] = double(rand() % (6 - 1) + 1); //double(rand() % (101 - 1) + 1) / 10;
+			for (int j = 0; j < N; j++) {
+				//matriz[i][j] = double(rand() % (6 - 1) + 1); //double(rand() % (101 - 1) + 1) / 10;
+				matriz2[i][j] = matriz[i][j];
+			}
 		}
 	}
 	void Imprimir() {
@@ -74,7 +92,13 @@ private:
 			}
 		}
 
-		cout << "El determinante es: " <<  (int)*det << endl;
+		cout << "El determinante es: ";
+		if (N <= 5) {
+			cout << float(*det) << endl;
+		}
+		else
+			cout << int(*det) << endl;
+
 		return *det;
 	}
 	void Escalonar() {
@@ -120,11 +144,47 @@ private:
 			cout << endl;
 		}
 	}
+	void Cholesky() {
+		float** submatriz = new float* [N];
+		for (int i = 0; i < N; i++) {
+			submatriz[i] = new float[N];
+		}
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				submatriz[i][j] = 0;
+			}
+		}
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j <= i; j++) {
+				float sum = 0;
+
+				if (j == i) {
+					for (int k = 0; k < j; k++)
+						sum += pow(submatriz[j][k], 2);
+					submatriz[j][j] = sqrt(matriz2[j][j] - sum);
+				}
+				else {
+					for (int k = 0; k < j; k++)
+						sum += (submatriz[i][k] * submatriz[j][k]);
+					submatriz[i][j] = (matriz2[i][j] - sum) / submatriz[j][j];
+				}
+			}
+		}
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				matriz[i][j] = submatriz[i][j];
+			}
+		}
+	}
 };
 
 int main() {
 	srand(time(NULL));
 	int n = 0;
+	bool flag = false;
+	bool flag2 = false;
 
 	do {
 		cout << "Ingrese n entre 4 y 10: "; cin >> n;
@@ -136,12 +196,18 @@ int main() {
 
 	if (m->Obtener_simetria() == true) {
 		cout << "La matriz es simetrica"<<endl;
+		flag = true;
+	}	
+
+	if (m->Obtener_determinante() > 0) {
+		cout << "La matriz es definida positiva";
+		flag2 = true;
 	}
 
-	
-
-	if (m->Obtener_determinante() >= 0) {
-		cout << "La matriz es definida positiva";
+	if (flag == true && flag2 == true) {
+		cout << endl << endl << "Factorizacion de Cholesky: " << endl;
+		m->Generar_Cholesky();
+		m->Imprimir_matriz();
 	}
 
 	_getch();
